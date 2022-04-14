@@ -7,11 +7,15 @@ import org.apache.mahout.cf.taste.model.DataModel;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 
 public class MovieRecommender {
 
 
     long reviews = 0;
+
+    HashMap<String, Long>  usersEncoded = new HashMap<String, Long>();
+    HashMap<String, Long> productsEncoded = new HashMap<String, Long>();
 
     MovieRecommender(String path) throws IOException {
         File rawData = new File(path);
@@ -30,21 +34,20 @@ public class MovieRecommender {
 
                 if (line.contains(sProduct)) {
                     product = line.replace(sProduct, "");
-                    System.out.println(product);
                 }
 
                 if (line.contains(sUser)) {
                     user = line.replace(sUser, "");
-                    System.out.println(user);
                 }
+
                 if (line.contains(sScore)) {
                     score = line.replace(sScore, "");
-                    System.out.println(score);
+                    System.out.println(storingUsers(user) + "," + storingProducts(product) + "," + score);
                     reviews++;
                 }
 
 
-                if(reviews==5) break;
+                if(reviews==10) break;
             }
         } finally {
             LineIterator.closeQuietly(it);
@@ -53,6 +56,20 @@ public class MovieRecommender {
 
     public long getTotalReviews(){
         return reviews;
+    }
+
+    private long storingUsers(String user){
+        if (!usersEncoded.containsKey(user)) {
+            usersEncoded.put(user, (long) (usersEncoded.size()+1));
+        }
+        return usersEncoded.get(user);
+    }
+
+    private long storingProducts(String product){
+        if (!productsEncoded.containsKey(product)) {
+            productsEncoded.put(product, (long) (productsEncoded.size()));
+        }
+        return productsEncoded.get(product);
     }
 
 
