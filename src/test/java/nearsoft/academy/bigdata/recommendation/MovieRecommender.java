@@ -9,11 +9,15 @@ import java.io.File;
 import java.io.IOException;
 
 public class MovieRecommender {
+
+
+    long reviews = 0;
+
     MovieRecommender(String path) throws IOException {
         File rawData = new File(path);
         LineIterator it = FileUtils.lineIterator(rawData, "UTF-8");
         try {
-            int freno = 0;
+
             String product = "";
             String user = "";
             String score = "";
@@ -25,22 +29,31 @@ public class MovieRecommender {
                 String sScore = "review/score: ";
 
                 if (line.contains(sProduct)) {
-                    System.out.println(line);
+                    product = line.replace(sProduct, "");
+                    System.out.println(product);
                 }
 
                 if (line.contains(sUser)) {
-                    System.out.println(line);
+                    user = line.replace(sUser, "");
+                    System.out.println(user);
                 }
                 if (line.contains(sScore)) {
-                    System.out.println(line);
-                    freno++;
+                    score = line.replace(sScore, "");
+                    System.out.println(score);
+                    reviews++;
                 }
 
 
-                if(freno==5) break;
+                if(reviews==5) break;
             }
         } finally {
             LineIterator.closeQuietly(it);
         }
     }
+
+    public long getTotalReviews(){
+        return reviews;
+    }
+
+
 }
