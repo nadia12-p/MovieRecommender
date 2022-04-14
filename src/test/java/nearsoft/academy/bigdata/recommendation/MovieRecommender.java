@@ -7,6 +7,7 @@ import org.apache.mahout.cf.taste.model.DataModel;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.HashMap;
 
 public class MovieRecommender {
@@ -22,9 +23,11 @@ public class MovieRecommender {
         LineIterator it = FileUtils.lineIterator(rawData, "UTF-8");
         try {
 
+            PrintWriter writer = new PrintWriter("MahoutInput.csv");
             String product = "";
             String user = "";
             String score = "";
+
             while (it.hasNext()) {
                 String line = it.nextLine();
                 // do something with line
@@ -42,13 +45,18 @@ public class MovieRecommender {
 
                 if (line.contains(sScore)) {
                     score = line.replace(sScore, "");
-                    System.out.println(storingUsers(user) + "," + storingProducts(product) + "," + score);
+                    String newLine = storingUsers(user) + "," + storingProducts(product) + "," + score + "\n";
+                    writer.write(newLine);
+                    //System.out.println(newLine);
                     reviews++;
                 }
 
 
-                if(reviews==10) break;
+                //if(reviews==10) break;
+
             }
+            writer.close();
+
         } finally {
             LineIterator.closeQuietly(it);
         }
@@ -57,6 +65,10 @@ public class MovieRecommender {
     public long getTotalReviews(){
         return reviews;
     }
+
+    public int getTotalUsers() {return usersEncoded.size();}
+
+    public int getTotalProducts() {return productsEncoded.size();}
 
     private long storingUsers(String user){
         if (!usersEncoded.containsKey(user)) {
