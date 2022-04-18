@@ -13,12 +13,15 @@ import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.UserBasedRecommender;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
 
 public class MovieRecommender {
 
@@ -46,17 +49,20 @@ public class MovieRecommender {
 
     //formats the input data for the Mahout model
     private void prepareData(String path) throws IOException {
-        File rawData = new File(path);
-        LineIterator it = FileUtils.lineIterator(rawData, "UTF-8");
-        try {
 
+        try {
+            Path workingpath = Paths.get(path);
+            InputStream is = Files.newInputStream(workingpath);
+            GZIPInputStream gis = new GZIPInputStream(is);
+            InputStreamReader isReader = new InputStreamReader(gis, StandardCharsets.UTF_8);
+            BufferedReader br = new BufferedReader(isReader);
+            String line;
             PrintWriter writer = new PrintWriter("MahoutInput.csv");
             String product = "";
             String user = "";
             String score = "";
 
-            while (it.hasNext()) {
-                String line = it.nextLine();
+            while ((line = br.readLine()) != null) {
                 //only looks for the lines that we need for the Mahout model
                 String sProduct = "product/productId: ";
                 String sUser = "review/userId: ";
@@ -80,9 +86,13 @@ public class MovieRecommender {
 
             }
             writer.close();
+            is.close();
+            gis.close();
+            isReader.close();
+            br.close();
 
         } finally {
-            LineIterator.closeQuietly(it);
+
         }
     }
 
@@ -101,7 +111,7 @@ public class MovieRecommender {
             usersEncoded.put(user, userMahout);
             usersDecoded.put(userMahout, user);
         }
-        return usersEncoded.get(user);
+        return usersEncoded.get(user); //regresa ya el indice de mahout
     }
 
     private long storingProducts(String product){
